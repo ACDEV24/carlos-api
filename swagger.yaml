@@ -1,0 +1,2051 @@
+swagger: '2.0'
+info:
+  description:
+    API para realizar ordener a las máquinas expendedoras
+    
+    Para empezar debes crear un usuario admin mediante el metodo POST admin/
+    
+    Este endpoint te devolvera un token el cual es valido para acceder a todos los endpoints.
+  version: 1.0.0
+  title: Vending Machine - API
+  # put the contact info for your development or API team
+  contact:
+    email: correo@email.com
+
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+
+# tags are used for organizing operations
+tags:
+- name: users
+  description: Rutas de usuarios
+- name: vendings
+  description: Rutas de vendings
+- name: lockers
+  description: Rutas de lockers
+- name: Service
+  description: Rutas de servicios
+- name: admins
+  description: Rutas de admins
+
+schemes:
+ - https
+ - http
+ 
+securityDefinitions:
+  Bearer:
+    type: apiKey
+    name: Authorization
+    in: header
+
+paths:
+
+# USER ROUTES
+
+  /users/:
+    post:
+      tags:
+      - users
+      summary: Registrar un usuario
+      operationId: postUser
+      description: |
+        Retorna al usuario registrado y el token
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: body
+          name: body
+          schema:
+            properties:
+              first_name:
+                type: string
+                example: "nombre"
+              last_name:
+                type: string
+                example: "apellido"
+              email:
+                type: string
+                example: correo@email.com
+              password:
+                type: string
+                example: "password"
+      responses:
+        200:
+          description: Usuario registrado
+          schema:
+            properties:
+              ok: 
+                type: boolean
+              user:
+                $ref: '#/definitions/User'
+              token:
+                type: string
+                example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Nzk5NzUzNDUsImlkIjoiNWUyYzc0YTE5YThjNGQ0YWQ2YzRjY2QxIiwicm9sZSI6IjEifQ.FIEc5P6x31i2UuCd0kL2cOH6nbwnLTDAyWbhU9QzpgU"
+                
+        400:
+          description: Error message
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+    get:
+      tags:
+      - admins
+      summary: Obtener todos los usuarios
+      operationId: getAllUsers
+      description: |
+        Retorna todos los usuarios
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          description: Admin privileges
+          required: true
+      responses:
+        200:
+          description: Usuarios registrados
+          schema:
+            properties:
+              ok: 
+                type: boolean
+              users:
+                type: array
+                items:
+                  $ref: '#/definitions/User'
+        400:
+          description: Error message
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /users/login:
+    post:
+      tags:
+      - users
+      summary: Login de usuarios
+      operationId: loginUser
+      description: |
+        Retorna usuario y token
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: body
+          name: body
+          schema:
+            properties:
+              email:
+                type: string
+                example: correo@email.com
+              password:
+                type: string
+                example: "password"
+      responses:
+        200:
+          description: Usuario
+          schema:
+            properties:
+              ok: 
+                type: boolean
+              user:
+                $ref: '#/definitions/User'
+              token:
+                type: string
+                example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Nzk5NzUzNDUsImlkIjoiNWUyYzc0YTE5YThjNGQ0YWQ2YzRjY2QxIiwicm9sZSI6IjEifQ.FIEc5P6x31i2UuCd0kL2cOH6nbwnLTDAyWbhU9QzpgU"
+                
+        400:
+          description: Error message
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /users/login/google:
+    post:
+      tags:
+      - users
+      summary: Login de usuarios usando google
+      operationId: loginUserWithGoogle
+      description: |
+        Recibe firebase token, hace el login y retorna usuario y token
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: body
+          name: body
+          schema:
+            properties:
+              token:
+                type: string
+                format: uuid
+              
+      responses:
+        200:
+          description: Usuario
+          schema:
+            properties:
+              ok: 
+                type: boolean
+              user:
+                $ref: '#/definitions/User'
+              token:
+                type: string
+                example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Nzk5NzUzNDUsImlkIjoiNWUyYzc0YTE5YThjNGQ0YWQ2YzRjY2QxIiwicm9sZSI6IjEifQ.FIEc5P6x31i2UuCd0kL2cOH6nbwnLTDAyWbhU9QzpgU"
+                
+        400:
+          description: Error message
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /users/signup/google:
+    post:
+      tags:
+      - users
+      summary: Registro de usuarios usando google
+      operationId: signupUserWithGoogle
+      description: |
+        Recibe firebase token, hace el registro y retorna usuario y token
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: body
+          name: body
+          schema:
+            properties:
+              token:
+                type: string
+                format: uuid
+              
+      responses:
+        200:
+          description: Usuario
+          schema:
+            properties:
+              ok: 
+                type: boolean
+              user:
+                $ref: '#/definitions/User'
+              token:
+                type: string
+                example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Nzk5NzUzNDUsImlkIjoiNWUyYzc0YTE5YThjNGQ0YWQ2YzRjY2QxIiwicm9sZSI6IjEifQ.FIEc5P6x31i2UuCd0kL2cOH6nbwnLTDAyWbhU9QzpgU"
+                
+        400:
+          description: Error message
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /users/{id}:
+    get:
+      tags:
+      - admins
+      summary: Obtener usuario por id
+      operationId: getUserById
+      description: |
+        Retorna al usuario del id
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: User id.
+        - in: header
+          name: Authorization
+          type: string
+          required: true
+      responses:
+        200:
+          description: Usuario
+          schema:
+            properties:
+              ok: 
+                type: boolean
+              user:
+                $ref: '#/definitions/User'
+        400:
+          description: Error message
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+    delete:
+      tags:
+      - users
+      summary: Eliminar usuario por id
+      operationId: deleteUser
+      description: |
+        Retorna al usuario eliminado
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: User id.
+        - in: header
+          name: Authorization
+          type: string
+          required: true
+      responses:
+        200:
+          description: Usuario eliminado
+          schema:
+            properties:
+              ok: 
+                type: boolean
+              user:
+                $ref: '#/definitions/User'
+        400:
+          description: Error message
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+    put:
+      tags:
+      - users
+      summary: Editar usuario
+      operationId: editUser
+      description: |
+        Retorna al usuario editado
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: User id.
+        - in: header
+          name: Authorization
+          type: string
+          required: true
+      responses:
+        200:
+          description: Usuario editado
+          schema:
+            properties:
+              ok: 
+                type: boolean
+              user:
+                $ref: '#/definitions/User'
+        400:
+          description: Error message
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+            
+    patch:
+      tags:
+      - admins
+      summary: Editar status del usuario
+      operationId: Update user stats
+      description: |
+        Retorna usuario editado
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: User id.
+        - in: header
+          name: Authorization
+          type: string
+          description: Admin privileges
+          required: true
+          
+        - in: body
+          name: body
+          schema:
+            properties:
+              status:
+                type: boolean
+                default: true
+                example: true
+      responses:
+        200:
+          description: Servicios del usuario que consulta
+          schema:
+            properties:
+              ok: 
+                type: boolean
+              user:
+                $ref: '#/definitions/User'
+        400:
+          description: Error message
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /users/me:
+    get:
+      tags:
+      - users
+      summary: Obtener usuario que está haciendo la consulta
+      operationId: getMyUser
+      description: |
+        Retorna al usuario que hace la consulta
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          required: true
+      responses:
+        200:
+          description: Usuario de la consulta
+          schema:
+            properties:
+              ok: 
+                type: boolean
+              user:
+                $ref: '#/definitions/User'
+        400:
+          description: Error message
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+  /vendings/:
+    get:
+      tags:
+      - vendings
+      summary: Ejecutar ordenes a vendings
+      operationId: ordersToVendings
+      description: |
+        Conexión web socket
+        Ejecutar ordenes a la las vendings
+        Las ordenes disponibles actualmente son consultar todos los lockers, consultar si un locker está abierto o cerrado
+        
+        type: Es la orden a ejecutar
+        data: Es el objeto que lleva todo el mensaje de la orden
+        
+        Si todo está marchando bien, el socket le devolverá el mismo "type" que mandaste
+        De lo contrario, la respuesta será un "type": -1
+        
+        PATH: ws://yourdomain.com/connection/
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      responses:
+        200:
+          description: Vendings disponibles
+          schema:
+            properties:
+              type: 
+                type: number
+                example: 1
+              data:
+                properties:
+                  products:
+                    type: array
+                    items:
+                      $ref: '#/definitions/SocketProduct'
+                  machineId:
+                    type: string
+                    example: "STM32-1234567891"
+                  user_id:
+                    type: string
+                    format: uuid
+        400:
+          description: Error message
+          schema:
+            properties:
+              type:
+                type: number
+                example: -1
+              data:
+                properties:
+                  product:
+                    $ref: '#/definitions/SocketProduct'
+                  message:
+                    type: string
+                    example: "product De toditos not dispensed"
+        401:
+          description: Error message
+          schema:
+            properties:
+              type:
+                type: number
+                example: -1
+              data:
+                properties:
+                  message:
+                    type: string
+                    example: "jwt must be provided"
+  
+  /vendings/type/0:
+    get:
+      tags:
+      - vendings
+      summary: Obtener todas las vendings
+      operationId: consultVendings
+      description: |
+        
+        type: Es la orden a ejecutar
+        data: Es el objeto que lleva todo el mensaje de la orden
+        
+        Si todo está marchando bien, el socket le devolverá el mismo "type" que mandaste
+        De lo contrario, la respuesta será un "type": -1
+        
+        Se debe mandar los siguientes parametros en el objeto "data"
+        
+        user_id: Identificador único del usuario
+        token: JWT de autenticacion
+
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: body
+          name: body
+          schema:
+            properties:
+              type: 
+                type: number
+                example: 3
+              data:
+                properties:
+                  user_id: 
+                    type: string
+                    format: uuid
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Nzk5NzUzNDUsImlkIjoiNWUyYzc0YTE5YThjNGQ0YWQ2YzRjY2QxIiwicm9sZSI6IjEifQ.FIEc5P6x31i2UuCd0kL2cOH6nbwnLTDAyWbhU9QzpgU"
+
+      responses:
+        200:
+          description: Vendings disponibles
+          schema:
+            properties:
+              type: 
+                type: number
+                example: 3
+              data:
+                properties:
+                  locker_name:
+                    type: string
+                    example: "the locker name"
+        400:
+          description: Error message
+          schema:
+            properties:
+              type:
+                type: number
+                example: -1
+              data:
+                properties:
+                  message:
+                    type: string
+                    example: "locker not found"
+        401:
+          description: Error message
+          schema:
+            properties:
+              type:
+                type: number
+                example: -1
+              data:
+                properties:
+                  message:
+                    type: string
+                    example: "jwt must be provided"
+  
+  
+  /vendings/type/1:
+    get:
+      tags:
+      - vendings
+      summary: Consultar los productos de una vending
+      operationId: consultVendingProducts
+      description: |
+        
+        type: Es la orden a ejecutar
+        data: Es el objeto que lleva todo el mensaje de la orden
+        
+        Si todo está marchando bien, el socket le devolverá el mismo "type" que mandaste
+        De lo contrario, la respuesta será un "type": -1
+        
+        Se debe mandar los siguientes parametros en el objeto "data"
+        
+        user_id: Identificador único del usuario
+        machine_id: Identificador de la vending
+        token: JWT de autenticacion
+
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: body
+          name: body
+          schema:
+            properties:
+              type: 
+                type: number
+                example: 4
+              data:
+                properties:
+                  user_id: 
+                    type: string
+                    format: uuid
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Nzk5NzUzNDUsImlkIjoiNWUyYzc0YTE5YThjNGQ0YWQ2YzRjY2QxIiwicm9sZSI6IjEifQ.FIEc5P6x31i2UuCd0kL2cOH6nbwnLTDAyWbhU9QzpgU"
+
+      responses:
+        200:
+          description: Vendings disponibles
+          schema:
+            properties:
+              type: 
+                type: number
+                example: 4
+              data:
+                properties:
+                  locker_name:
+                    type: string
+                    example: "the locker name"
+                  boxes:
+                    type: array
+                    items:
+                      properties:
+                        name:
+                          type: string
+                          example: "Box1_name"
+                        is_open:
+                          type: boolean
+                          example: false
+        400:
+          description: Error message
+          schema:
+            properties:
+              type:
+                type: number
+                example: -1
+              data:
+                properties:
+                  message:
+                    type: string
+                    example: "lockers not found"
+        401:
+          description: Error message
+          schema:
+            properties:
+              type:
+                type: number
+                example: -1
+              data:
+                properties:
+                  message:
+                    type: string
+                    example: "jwt must be provided"
+  
+  
+  /vendings/type/2:
+    get:
+      tags:
+      - vendings
+      summary: Obtener detalles de una vending
+      operationId: getMachineDetails
+      description: |
+        
+        type: Es la orden a ejecutar
+        data: Es el objeto que lleva todo el mensaje de la orden
+        
+        Si todo está marchando bien, el socket le devolverá el mismo "type" que mandaste
+        De lo contrario, la respuesta será un "type": -1
+        
+        Se debe mandar los siguientes parametros en el objeto "data"
+        
+        user_id: Identificador único del usuario
+        locker_name: Nombre del locker a consultar
+        box_name: Nombre de la caja que se quiere abrir
+        token: JWT de autenticacion
+
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: body
+          name: body
+          schema:
+            properties:
+              type: 
+                type: number
+                example: 5
+              data:
+                properties:
+                  user_id: 
+                    type: string
+                    format: uuid
+                  locker_name:
+                    type: string
+                    example: "locker-10001/"
+                  box_name:
+                    type: string
+                    example: "Box1_name"
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Nzk5NzUzNDUsImlkIjoiNWUyYzc0YTE5YThjNGQ0YWQ2YzRjY2QxIiwicm9sZSI6IjEifQ.FIEc5P6x31i2UuCd0kL2cOH6nbwnLTDAyWbhU9QzpgU"
+
+      responses:
+        200:
+          description: Vendings disponibles
+          schema:
+            properties:
+              type: 
+                type: number
+                example: 5
+              data:
+                properties:
+                  locker_name:
+                    type: string
+                    example: "the locker name"
+                  box_name:
+                    type: string
+                    example: "Box1_name"
+                  is_open:
+                    type: boolean
+                    example: false
+        400:
+          description: Error message
+          schema:
+            properties:
+              type:
+                type: number
+                example: -1
+              data:
+                properties:
+                  message:
+                    type: string
+                    example: "locker not found"
+        401:
+          description: Error message
+          schema:
+            properties:
+              type:
+                type: number
+                example: -1
+              data:
+                properties:
+                  message:
+                    type: string
+                    example: "jwt must be provided"
+  
+  /vendings/type/3:
+    get:
+      tags:
+      - vendings
+      summary: Dispensar productos
+      operationId: dispenseProducts
+      description: |
+        
+        type: Es la orden a ejecutar
+        data: Es el objeto que lleva todo el mensaje de la orden
+        
+        Si todo está marchando bien, el socket le devolverá el mismo "type" que mandaste
+        De lo contrario, la respuesta será un "type": -1
+        
+        Se debe mandar los siguientes parametros en el objeto "data"
+        
+        user_id: Identificador único del usuario
+        locker_name: Nombre del locker a consultar
+        box_name: Nombre de la caja que se quiere abrir
+        token: JWT de autenticacion
+
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: body
+          name: body
+          schema:
+            properties:
+              type: 
+                type: number
+                example: 5
+              data:
+                properties:
+                  user_id: 
+                    type: string
+                    format: uuid
+                  locker_name:
+                    type: string
+                    example: "locker-10001/"
+                  box_name:
+                    type: string
+                    example: "Box1_name"
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Nzk5NzUzNDUsImlkIjoiNWUyYzc0YTE5YThjNGQ0YWQ2YzRjY2QxIiwicm9sZSI6IjEifQ.FIEc5P6x31i2UuCd0kL2cOH6nbwnLTDAyWbhU9QzpgU"
+
+      responses:
+        200:
+          description: Vendings disponibles
+          schema:
+            properties:
+              type: 
+                type: number
+                example: 5
+              data:
+                properties:
+                  locker_name:
+                    type: string
+                    example: "the locker name"
+                  box_name:
+                    type: string
+                    example: "Box1_name"
+                  is_open:
+                    type: boolean
+                    example: false
+        400:
+          description: Error message
+          schema:
+            properties:
+              type:
+                type: number
+                example: -1
+              data:
+                properties:
+                  message:
+                    type: string
+                    example: "locker not found"
+        401:
+          description: Error message
+          schema:
+            properties:
+              type:
+                type: number
+                example: -1
+              data:
+                properties:
+                  message:
+                    type: string
+                    example: "jwt must be provided"
+  
+
+  /lockers/:
+    get:
+      tags:
+      - lockers
+      summary: Ejecutar ordenes a lockers
+      operationId: ordersToLockers
+      description: |
+        Conexión web socket
+        Ejecutar ordenes a la los lockers
+        Las ordenes disponibles actualmente son consultar todos los lockers, consultar si un locker está abierto o cerrado
+        
+        type: Es la orden a ejecutar
+        data: Es el objeto que lleva todo el mensaje de la orden
+        
+        Si todo está marchando bien, el socket le devolverá el mismo "type" que mandaste
+        De lo contrario, la respuesta será un "type": -1
+        
+        PATH: ws://yourdomain.com/connection/
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      responses:
+        200:
+          description: Vendings disponibles
+          schema:
+            properties:
+              type: 
+                type: number
+                example: 1
+              data:
+                properties:
+                  products:
+                    type: array
+                    items:
+                      $ref: '#/definitions/SocketProduct'
+                  machineId:
+                    type: string
+                    example: "STM32-1234567891"
+                  user_id:
+                    type: string
+                    format: uuid
+        400:
+          description: Error message
+          schema:
+            properties:
+              type:
+                type: number
+                example: -1
+              data:
+                properties:
+                  product:
+                    $ref: '#/definitions/SocketProduct'
+                  message:
+                    type: string
+                    example: "product De toditos not dispensed"
+        401:
+          description: Error message
+          schema:
+            properties:
+              type:
+                type: number
+                example: -1
+              data:
+                properties:
+                  message:
+                    type: string
+                    example: "jwt must be provided"
+  
+  /lockers/type/4:
+    get:
+      tags:
+      - lockers
+      summary: Consultar estado de locker
+      operationId: consultLocker
+      description: |
+        
+        type: Es la orden a ejecutar
+        data: Es el objeto que lleva todo el mensaje de la orden
+        
+        Si todo está marchando bien, el socket le devolverá el mismo "type" que mandaste
+        De lo contrario, la respuesta será un "type": -1
+        
+        Se debe mandar los siguientes parametros en el objeto "data"
+        
+        user_id: Identificador único del usuario
+        locker_name: Nombre del locker a consultar
+        token: JWT de autenticacion
+
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: body
+          name: body
+          schema:
+            properties:
+              type: 
+                type: number
+                example: 3
+              data:
+                properties:
+                  user_id: 
+                    type: string
+                    format: uuid
+                  locker_name:
+                    type: string
+                    example: "locker-10001/"
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Nzk5NzUzNDUsImlkIjoiNWUyYzc0YTE5YThjNGQ0YWQ2YzRjY2QxIiwicm9sZSI6IjEifQ.FIEc5P6x31i2UuCd0kL2cOH6nbwnLTDAyWbhU9QzpgU"
+
+      responses:
+        200:
+          description: Vendings disponibles
+          schema:
+            properties:
+              type: 
+                type: number
+                example: 3
+              data:
+                properties:
+                  locker_name:
+                    type: string
+                    example: "the locker name"
+                  boxes:
+                    type: array
+                    items:
+                      properties:
+                        name:
+                          type: string
+                          example: "Box1_name"
+                        is_open:
+                          type: boolean
+                          example: false
+        400:
+          description: Error message
+          schema:
+            properties:
+              type:
+                type: number
+                example: -1
+              data:
+                properties:
+                  message:
+                    type: string
+                    example: "locker not found"
+        401:
+          description: Error message
+          schema:
+            properties:
+              type:
+                type: number
+                example: -1
+              data:
+                properties:
+                  message:
+                    type: string
+                    example: "jwt must be provided"
+  
+  
+  /lockers/type/5:
+    get:
+      tags:
+      - lockers
+      summary: Consultar todos los lockers disponibles
+      operationId: consultAllLockers
+      description: |
+        
+        type: Es la orden a ejecutar
+        data: Es el objeto que lleva todo el mensaje de la orden
+        
+        Si todo está marchando bien, el socket le devolverá el mismo "type" que mandaste
+        De lo contrario, la respuesta será un "type": -1
+        
+        Se debe mandar los siguientes parametros en el objeto "data"
+        
+        user_id: Identificador único del usuario
+        token: JWT de autenticacion
+
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: body
+          name: body
+          schema:
+            properties:
+              type: 
+                type: number
+                example: 4
+              data:
+                properties:
+                  user_id: 
+                    type: string
+                    format: uuid
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Nzk5NzUzNDUsImlkIjoiNWUyYzc0YTE5YThjNGQ0YWQ2YzRjY2QxIiwicm9sZSI6IjEifQ.FIEc5P6x31i2UuCd0kL2cOH6nbwnLTDAyWbhU9QzpgU"
+
+      responses:
+        200:
+          description: Vendings disponibles
+          schema:
+            properties:
+              type: 
+                type: number
+                example: 4
+              data:
+                properties:
+                  locker_name:
+                    type: string
+                    example: "the locker name"
+                  boxes:
+                    type: array
+                    items:
+                      properties:
+                        name:
+                          type: string
+                          example: "Box1_name"
+                        is_open:
+                          type: boolean
+                          example: false
+        400:
+          description: Error message
+          schema:
+            properties:
+              type:
+                type: number
+                example: -1
+              data:
+                properties:
+                  message:
+                    type: string
+                    example: "lockers not found"
+        401:
+          description: Error message
+          schema:
+            properties:
+              type:
+                type: number
+                example: -1
+              data:
+                properties:
+                  message:
+                    type: string
+                    example: "jwt must be provided"
+  
+  
+  /lockers/type/6:
+    get:
+      tags:
+      - lockers
+      summary: Abrir locker
+      operationId: openLocker
+      description: |
+        
+        type: Es la orden a ejecutar
+        data: Es el objeto que lleva todo el mensaje de la orden
+        
+        Si todo está marchando bien, el socket le devolverá el mismo "type" que mandaste
+        De lo contrario, la respuesta será un "type": -1
+        
+        Se debe mandar los siguientes parametros en el objeto "data"
+        
+        user_id: Identificador único del usuario
+        locker_name: Nombre del locker a consultar
+        box_name: Nombre de la caja que se quiere abrir
+        token: JWT de autenticacion
+
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: body
+          name: body
+          schema:
+            properties:
+              type: 
+                type: number
+                example: 5
+              data:
+                properties:
+                  user_id: 
+                    type: string
+                    format: uuid
+                  locker_name:
+                    type: string
+                    example: "locker-10001/"
+                  box_name:
+                    type: string
+                    example: "Box1_name"
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Nzk5NzUzNDUsImlkIjoiNWUyYzc0YTE5YThjNGQ0YWQ2YzRjY2QxIiwicm9sZSI6IjEifQ.FIEc5P6x31i2UuCd0kL2cOH6nbwnLTDAyWbhU9QzpgU"
+
+      responses:
+        200:
+          description: Vendings disponibles
+          schema:
+            properties:
+              type: 
+                type: number
+                example: 5
+              data:
+                properties:
+                  locker_name:
+                    type: string
+                    example: "the locker name"
+                  box_name:
+                    type: string
+                    example: "Box1_name"
+                  is_open:
+                    type: boolean
+                    example: false
+        400:
+          description: Error message
+          schema:
+            properties:
+              type:
+                type: number
+                example: -1
+              data:
+                properties:
+                  message:
+                    type: string
+                    example: "locker not found"
+        401:
+          description: Error message
+          schema:
+            properties:
+              type:
+                type: number
+                example: -1
+              data:
+                properties:
+                  message:
+                    type: string
+                    example: "jwt must be provided"
+  
+  /services/{id}:
+    get:
+      tags:
+      - Service
+      summary: Obtener servicio por id
+      operationId: getServiceById
+      description: |
+        Retorna el servicio requerido
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: ID del servicio
+        - in: header
+          name: Authorization
+          type: string
+          required: true
+      responses:
+        200:
+          description: Servicio de la consulta
+          schema:
+            properties:
+              ok: 
+                type: boolean
+              service:
+                $ref: '#/definitions/Service'
+        400:
+          description: Error message
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+    put:
+      tags:
+      - admins
+      summary: Editar servicio
+      operationId: editService
+      description: |
+        Retorna el servicio editado
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: ID del servicio
+        - in: header
+          name: Authorization
+          type: string
+          description: Admin privileges
+          required: true
+      responses:
+        200:
+          description: Servicio editado
+          schema:
+            properties:
+              ok: 
+                type: boolean
+              Service:
+                type: array
+                items:
+                  $ref: '#/definitions/Service'
+        400:
+          description: Error message
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+            
+    delete:
+      tags:
+      - admins
+      summary: Eliminar servicio
+      operationId: deleteService
+      description: |
+        Retorna el servicio eliminado
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: ID del servicio
+        - in: header
+          name: Authorization
+          type: string
+          description: Admin privileges
+          required: true
+      responses:
+        200:
+          description: Servicio eliminado
+          schema:
+            properties:
+              ok: 
+                type: boolean
+              Service:
+                type: array
+                items:
+                  $ref: '#/definitions/Service'
+        400:
+          description: Error message
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /services/me:
+    get:
+      tags:
+      - Service
+      summary: Obtener servicios del usuario que consulta
+      operationId: getMyService
+      description: |
+        Retorna los servicios del usuario que hace la consulta
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          required: true
+      responses:
+        200:
+          description: Servicios del usuario que consulta
+          schema:
+            properties:
+              ok: 
+                type: boolean
+              Service:
+                type: array
+                items:
+                  $ref: '#/definitions/Service'
+        400:
+          description: Error message
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /services:
+    get:
+      tags:
+      - admins
+      summary: Obtener todos los servicios
+      operationId: getAllService
+      description: |
+        Retorna todos los servicios
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          description: Admin privileges
+          required: true
+      responses:
+        200:
+          description: Servicios del usuario que consulta
+          schema:
+            properties:
+              ok: 
+                type: boolean
+              Service:
+                type: array
+                items:
+                  $ref: '#/definitions/Service'
+        400:
+          description: Error message
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /services/users/{id}:
+    get:
+      tags:
+      - admins
+      summary: Obtener todos los servicios por usuario
+      operationId: getAllUserService
+      description: |
+        Retorna todos los servicios del usuario
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: ID del usuario
+        - in: header
+          name: Authorization
+          type: string
+          description: Admin privileges
+          required: true
+      responses:
+        200:
+          description: Servicios del usuario
+          schema:
+            properties:
+              ok: 
+                type: boolean
+              Service:
+                type: array
+                items:
+                  $ref: '#/definitions/Service'
+        400:
+          description: Error message
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+  /services/vendings/{id}:
+    get:
+      tags:
+      - admins
+      summary: Obtener todos los servicios por vending
+      operationId: getAllVendingsService
+      description: |
+        Retorna todos los servicios de la vending
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: ID de la vending
+        - in: header
+          name: Authorization
+          type: string
+          description: Admin privileges
+          required: true
+      responses:
+        200:
+          description: Servicios de la vending
+          schema:
+            properties:
+              ok: 
+                type: boolean
+              Service:
+                type: array
+                items:
+                  $ref: '#/definitions/Service'
+        400:
+          description: Error message
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+            
+  /admins/:
+    post:
+      tags:
+      - admins
+      summary: Registrar un Admin
+      operationId: createAdmin
+      description: |
+        Retorna al usuario registrado y el token
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: body
+          name: body
+          schema:
+            properties:
+              first_name:
+                type: string
+                example: "nombre"
+              last_name:
+                type: string
+                example: "apellido"
+              email:
+                type: string
+                example: correo@email.com
+              password:
+                type: string
+                example: "password"
+      responses:
+        200:
+          description: Usuario registrado
+          schema:
+            properties:
+              ok: 
+                type: boolean
+              user:
+                $ref: '#/definitions/User'
+              token:
+                type: string
+                example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Nzk5NzUzNDUsImlkIjoiNWUyYzc0YTE5YThjNGQ0YWQ2YzRjY2QxIiwicm9sZSI6IjEifQ.FIEc5P6x31i2UuCd0kL2cOH6nbwnLTDAyWbhU9QzpgU"
+                
+        400:
+          description: Error message
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+    get:
+      tags:
+      - admins
+      summary: Obtener todos los admins
+      operationId: getAllAdmins
+      description: |
+        Retorna todos los usuarios
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          description: Admin privileges
+          required: true
+      responses:
+        200:
+          description: Usuarios registrados
+          schema:
+            properties:
+              ok: 
+                type: boolean
+              users:
+                type: array
+                items:
+                  $ref: '#/definitions/User'
+        400:
+          description: Error message
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /admins/login:
+    post:
+      tags:
+      - admins
+      summary: Login de admins
+      operationId: loginAdmins
+      description: |
+        Retorna usuario y token
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: body
+          name: body
+          schema:
+            properties:
+              email:
+                type: string
+                example: correo@email.com
+              password:
+                type: string
+                example: "password"
+      responses:
+        200:
+          description: Usuario
+          schema:
+            properties:
+              ok: 
+                type: boolean
+              user:
+                $ref: '#/definitions/User'
+              token:
+                type: string
+                example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE1Nzk5NzUzNDUsImlkIjoiNWUyYzc0YTE5YThjNGQ0YWQ2YzRjY2QxIiwicm9sZSI6IjEifQ.FIEc5P6x31i2UuCd0kL2cOH6nbwnLTDAyWbhU9QzpgU"
+                
+        400:
+          description: Error message
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+  /admins/{id}:
+    get:
+      tags:
+      - admins
+      summary: Obtener admin por id
+      operationId: getAdminById
+      description: |
+        Retorna al usuario del id
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: User id.
+        - in: header
+          name: Authorization
+          type: string
+          required: true
+      responses:
+        200:
+          description: Usuario
+          schema:
+            properties:
+              ok: 
+                type: boolean
+              user:
+                $ref: '#/definitions/User'
+        400:
+          description: Error message
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+    delete:
+      tags:
+      - admins
+      summary: Eliminar admin por id
+      operationId: deleteAdmin
+      description: |
+        Retorna al usuario eliminado
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: User id.
+        - in: header
+          name: Authorization
+          type: string
+          required: true
+      responses:
+        200:
+          description: Usuario eliminado
+          schema:
+            properties:
+              ok: 
+                type: boolean
+              user:
+                $ref: '#/definitions/User'
+        400:
+          description: Error message
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+    put:
+      tags:
+      - admins
+      summary: Editar admin
+      operationId: editAdmin
+      description: |
+        Retorna al usuario editado
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: body
+          name: body
+          required: true
+          schema:
+            $ref: '#/definitions/User'
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: User id.
+        - in: header
+          name: Authorization
+          type: string
+          required: true
+      responses:
+        200:
+          description: Usuario editado
+          schema:
+            properties:
+              ok: 
+                type: boolean
+              user:
+                $ref: '#/definitions/User'
+        400:
+          description: Error message
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+            
+    patch:
+      tags:
+      - admins
+      summary: Editar status del admin
+      operationId: UpdateAdminStatus
+      description: |
+        Retorna usuario editado
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: path
+          name: id
+          type: string
+          required: true
+          description: User id.
+        - in: header
+          name: Authorization
+          type: string
+          description: Admin privileges
+          required: true
+          
+        - in: body
+          name: body
+          schema:
+            properties:
+              status:
+                type: boolean
+                default: true
+                example: true
+      responses:
+        200:
+          description: Servicios del usuario que consulta
+          schema:
+            properties:
+              ok: 
+                type: boolean
+              user:
+                $ref: '#/definitions/User'
+        400:
+          description: Error message
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+  /admins/me:
+    get:
+      tags:
+      - admins
+      summary: Obtener admin que está haciendo la consulta
+      operationId: getMyAdminUser
+      description: |
+        Retorna al usuario que hace la consulta
+      produces:
+      - application/json
+      security:
+      - Bearer: []
+      parameters:
+        - in: header
+          name: Authorization
+          type: string
+          required: true
+      responses:
+        200:
+          description: Usuario de la consulta
+          schema:
+            properties:
+              ok: 
+                type: boolean
+              user:
+                $ref: '#/definitions/User'
+        400:
+          description: Error message
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+
+
+
+definitions:
+  Product:
+    type: object
+    required:
+      - name
+      - price
+      - image
+      - item
+      - description
+      - quantity
+      - machine_id
+    properties:
+      id:
+        type: string
+        format: uuid
+        example: 'd290f1ee-6c54-4b01-90e6-d701748f0851'
+      name:
+        type: string
+        example: 'De toditos de limón'
+      price:
+        type: number
+        format: integer
+        example: 15000
+      image:
+        type: string
+        example: 'https://example.com/mypicture.jpg'
+      item:
+        type: string
+        example: "15"
+      description:
+        type: string
+        example: "product description product description product description"
+      quantity:
+        type: number
+        format: integer
+        example: 10
+      machine_id:
+        type: string
+        example: "STM32-1234567891"
+      status:
+        type: boolean
+        example: true
+        default: true
+      created_at:
+        type: string
+        format: datetime
+        example: '2019-12-11T19:22:49.503Z'
+      updated_at:
+        type: string
+        format: datetime
+        example: '2019-12-11T19:22:49.503Z'
+  SocketProduct:
+    type: object
+    required:
+      - id
+      - name
+      - item
+    properties:
+      id:
+        type: string
+        format: uuid
+      name:
+        type: string
+        example: "De toditos natural"
+      item:
+        type: string
+        example: "27"
+  User:
+    required:
+      - first_name
+      - last_name
+      - email
+    properties:
+      id:
+        type: string
+        format: uuid
+        example: 'd290f1ee-6c54-4b01-90e6-d701748f0851'
+      first_name:
+        type: string
+        example: nombre
+      last_name:
+        type: string
+        example: apellido
+      email:
+        type: string
+        format: url
+        example: correo@email.com
+      requests:
+        type: number
+        format: integer
+        example: 5
+      status:
+        type: boolean
+        example: true
+        default: true
+      uid:
+        type: string
+        example: 'd290f1ee-6c54-4b01-90e6-d701748f0851'
+      password:
+        type: string
+        example: password
+      created_at:
+        type: string
+        format: datetime
+        example: '2019-12-11T19:22:49.503Z'
+      updated_at:
+        type: string
+        format: datetime
+        example: '2019-12-11T19:22:49.503Z'
+  Vending:
+    type: object
+    required:
+      - name
+      - machine_id
+      - image
+    properties:
+      id:
+        type: string
+        format: uuid
+        example: 'd290f1ee-6c54-4b01-90e6-d701748f0851'
+      name:
+        type: string
+        example: "Vending #1"
+      image:
+        type: string
+        example: 'https://example.com/mypicture.jpg'
+      machine_id:
+        type: string
+        example: 'STM32-1234567891'
+      created_at:
+        type: string
+        format: datetime
+        example: '2019-12-11T19:22:49.503Z'
+      updated_at:
+        type: string
+        format: datetime
+        example: '2019-12-11T19:22:49.503Z'
+  Service:
+    type: object
+    required:
+      - user_id
+      - machine_id
+      - products
+    properties:
+      id:
+        type: string
+        format: uuid
+        example: 'd290f1ee-6c54-4b01-90e6-d701748f0851'
+      products:
+        type: array
+        items:
+          properties:
+            id:
+              type: string
+              format: uuid
+            dispensed:
+              type: boolean
+              example: false
+              default: true
+            price:
+              type: number
+              example: 2200
+              default: 0
+      user_id:
+        type: string
+        format: uuid
+        example: 'd290f1ee-6c54-4b01-90e6-d701748f0851'
+      machine_id:
+        type: string
+        example: 'STM32-1234567891'
+      reference:
+        type: string
+        example: 'u89cd701748f0851'
+      value:
+        type: number
+        example: 10000
+      success:
+        type: boolean
+        example: true
+        default: true
+      created_at:
+        type: string
+        format: datetime
+        example: '2019-12-11T19:22:49.503Z'
+      updated_at:
+        type: string
+        format: datetime
+        example: '2019-12-11T19:22:49.503Z'
+  ErrorResponse:
+    required:
+      - ok
+      - message
+    properties:
+      ok:
+        type: boolean
+        default: false
+      message:
+        type: string
+        example: 'Error message'
+
+host: 20.65.46.44:3004
+basePath: /api
